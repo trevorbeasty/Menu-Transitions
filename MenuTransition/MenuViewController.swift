@@ -14,7 +14,7 @@ class MenuViewController: UIViewController {
     
     let transitionAnimator = MenuSlideInAnimator()
     let transitionAnimator_2 = MenuWithBackgroundAnimator(backgroundImage: #imageLiteral(resourceName: "rabbits"))
-    let first = true
+    let first = false
     
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
