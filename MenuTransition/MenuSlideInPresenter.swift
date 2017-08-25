@@ -10,7 +10,12 @@ import UIKit
 
 class MenuSlideInPresenter: UIPresentationController {
     
-    let coverage: CGFloat = 0.7
+    let coverage: CGFloat
+    
+    init(presentedViewController: UIViewController, presenting presentingViewController: UIViewController?, coverage: CGFloat) {
+        self.coverage = coverage
+        super.init(presentedViewController: presentedViewController, presenting: presentingViewController)
+    }
     
     fileprivate var blurView: UIView!
     

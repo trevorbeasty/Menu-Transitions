@@ -10,7 +10,8 @@ import UIKit
 
 class MenuSlideInAnimator: NSObject {
     
-    let duration: TimeInterval = 1.0
+    var duration: TimeInterval = 0.5
+    var presentedWidthCoverage: CGFloat = 0.7
     var presenting = true
     
 
@@ -19,7 +20,7 @@ class MenuSlideInAnimator: NSObject {
 extension MenuSlideInAnimator: UIViewControllerTransitioningDelegate {
     
     func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
-        return MenuSlideInPresenter(presentedViewController: presented, presenting: presenting)
+        return MenuSlideInPresenter(presentedViewController: presented, presenting: presenting, coverage: presentedWidthCoverage)
     }
     
     func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
