@@ -8,7 +8,10 @@
 
 import UIKit
 
-
+enum MenuOrientation {
+    case MenuLeft
+    case MenuRight
+}
 
 class MenuWithBackgroundAnimator: NSObject {
     
@@ -19,8 +22,8 @@ class MenuWithBackgroundAnimator: NSObject {
     var presentedAnimationScale: CGFloat = 0.6
     var presentedAnimationCenterXTranslation: CGFloat = 60.0
     var presentingAnimationScale: CGFloat = 0.4
-    var presentingAnimationCenterX: CGFloat = 0.0
     
+    var menuOrientation: MenuOrientation = .MenuLeft
     var presenting = true
     
     init(backgroundImage: UIImage) {
@@ -66,10 +69,8 @@ extension MenuWithBackgroundAnimator: UIViewControllerAnimatedTransitioning {
         
         let presentedSizeTransform = CGAffineTransform(scaleX: presentedAnimationScale, y: presentedAnimationScale)
         
-        let finalPresentedFrame = transitionContext.finalFrame(for: presentedController)
-        
         if presenting {
-            presentedView.frame = finalPresentedFrame
+            presentedView.frame = transitionContext.finalFrame(for: presentedController)
             presentedView.center.x -= presentedAnimationCenterXTranslation
             presentedView.transform = presentedSizeTransform
             presentedView.alpha = 0.0
@@ -79,20 +80,89 @@ extension MenuWithBackgroundAnimator: UIViewControllerAnimatedTransitioning {
         UIView.animate(
             withDuration: duration,
             animations: {
-                let plusMinus: CGFloat = self.presenting ? 1.0 : -1.0
-                presentedView.center.x += self.presentedAnimationCenterXTranslation * plusMinus
-                presentedView.transform = self.presenting ? .identity : presentedSizeTransform
+                presentedView.center.x += self.presentedViewCenterTranslation(presenting: self.presenting, orientation: self.menuOrientation, offset: self.presentedAnimationCenterXTranslation)
+                presentedView.transform = self.finalPresentedViewTransform(presenting: self.presenting, scale: self.presentedAnimationScale)
                 presentedView.alpha = self.presenting ? 1.0 : 0.0
                 
-                let finalPresentingTransform: CGAffineTransform = self.presenting ? CGAffineTransform(scaleX: self.presentingAnimationScale, y: self.presentingAnimationScale) : .identity
-                let finalPresentingCenter = self.presenting ? CGPoint(x: self.presentingAnimationCenterX, y: container.center.y) : container.center
-                presentingView.transform = finalPresentingTransform
-                presentingView.center = finalPresentingCenter
+                presentingView.transform = self.finalPresentingViewTransform(presenting: self.presenting , scale: self.presentingAnimationScale)
+                presentingView.center = self.finalPresentingCenter(presenting: self.presenting, orientation: self.menuOrientation, container: container)
         },
             completion: { completed in
                 transitionContext.completeTransition(true)
         })
     }
+    
+    private func finalPresentingCenter(presenting: Bool, orientation: MenuOrientation, container: UIView) -> CGPoint {
+        let center: CGPoint
+        
+        switch presenting {
+        case true where orientation == .MenuRight:
+            center = CGPoint(x: 0.0, y: container.center.y)
+            
+        case true where orientation == .MenuLeft:
+            center = CGPoint(x: container.frame.width, y: container.center.y)
+            
+        case false:
+            center = container.center
+            
+        default:
+            center = container.center
+        }
+        
+        return center
+    }
+    
+    private func finalPresentingViewTransform(presenting: Bool, scale: CGFloat) -> CGAffineTransform {
+        let transform: CGAffineTransform
+        
+        switch presenting {
+        case true:
+            transform = CGAffineTransform(scaleX: scale, y: scale)
+            
+        case false:
+            transform = .identity
+        }
+        
+        return transform
+    }
+    
+    private func presentedViewCenterTranslation(presenting: Bool, orientation: MenuOrientation, offset: CGFloat) -> CGFloat {
+        var translation: CGFloat
+        
+        switch presenting {
+        case true where orientation == .MenuRight:
+            translation = offset
+            
+        case true where orientation == .MenuLeft:
+            translation = -1.0 * offset
+            
+        case false where orientation == .MenuRight:
+            translation = -1.0 * offset
+            
+        case false where orientation == .MenuLeft:
+            translation = offset
+            
+        default:
+            translation = 0.0
+        }
+        
+        return translation
+    }
+    
+    private func finalPresentedViewTransform(presenting: Bool, scale: CGFloat) -> CGAffineTransform {
+        let transform: CGAffineTransform
+        
+        switch presenting {
+        case false:
+            transform = CGAffineTransform(scaleX: scale, y: scale)
+            
+        case true:
+            transform = .identity
+        }
+        
+        return transform
+    }
+
 }
 
 
